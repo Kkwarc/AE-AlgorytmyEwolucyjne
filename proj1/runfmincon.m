@@ -1,35 +1,42 @@
 function [xsol,fval,history, info] = runfmincon(mainAlgorytm, inAlgorytm, Gradient, Hesian, initPoint, const, i)
- 
-% Set up shared variables with outfun
-history.x = [];
-history.fval = [];
- 
 % Call optimization
 x0 = [initPoint(1), initPoint(2)];
 a = const(1);
 b = const(2);
 
+    function [X, Y, Z] = xyz()
+        [X,Y] = meshgrid(-5:0.2:5, -5:0.2:5);
+        Z = (1 - X + a).^2 + 100*(Y - b - (X - a).^2).^2;
+    end
+           
+% Set up shared variables with outfun
+history.x = [];
+history.fval = [];
+ 
 grad = true;
 if strcmp(Gradient, 'None')
     grad = false;
 end
 
+display = 'off'; %off / iter
 if strcmp(mainAlgorytm, 'fminunc')
     if grad == true
         opts = optimoptions('fminunc','Algorithm', inAlgorytm, ...
-        'Display','iter','SpecifyObjectiveGradient', true, 'TolFun', 1e-10, 'OutputFcn',@outfun);
+        'Display',display,'SpecifyObjectiveGradient', true, 'TolFun', 1e-10,...
+        'OutputFcn',@outfun);
         [xsol,fval, f, info] = fminunc(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
         logPlot(history)
         
     else
         opts = optimoptions('fminunc','Algorithm', inAlgorytm, ...
-        'Display','iter','GradObj', 'on', 'TolFun', 1e-10, 'OutputFcn',@outfun);
+        'Display',display,'GradObj', 'on', 'TolFun', 1e-10,...
+        'OutputFcn',@outfun);
         [xsol,fval, f, info] = fminunc(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
         logPlot(history)
         
     end
 elseif strcmp(mainAlgorytm, 'fminsearch')
-     opts = optimset('Display','iter',...
+     opts = optimset('Display',display,...
          'TolFun', 1e-10, 'OutputFcn',@outfun);
     [xsol,fval, f, info] = fminsearch(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
     logPlot(history)
@@ -45,16 +52,40 @@ end
          % value with history. x must be a row vector.
            history.fval = [history.fval; optimValues.fval];
            history.x = [history.x; x];
-
+            
+           [X, Y, Z] = xyz();
            figure(2*i-1)
-           plot(x(1),x(2),'o');
+           surf(X,Y,Z);
+           hold on;
+           grid on;
+           plot3(x(1),x(2), fbanan(x, a, b), '.','Color','yellow','MarkerSize',20);
+           axis([-5 5 -5 5 0 10000000]);
+           view(0,90)
+           axis equal;
            
            %after second iteration start arrows
+           headWidth = 1;
+           headLength = 2;
+           LineLength = 0.1;
            if size(history.x)>=2
                one=history.x(end,:);
                two=history.x(end-1,:);
                diff = one-two;
-               quiver(two(1),two(2),diff(1),diff(2),0,'color',[0 0 1])
+               
+               hq = quiver(two(1),two(2),diff(1),diff(2));
+               U = hq.UData;
+               V = hq.VData;
+               X = hq.XData;
+               Y = hq.YData;
+               for ii = 1:length(X)
+                   for ij = 1:length(X)
+                       headWidth = 1;
+                       ah = annotation('arrow','Color','green',...
+                       'headStyle','cback1','HeadLength',headLength,'HeadWidth',headWidth);
+                       set(ah,'parent',gca);
+                       set(ah,'position',[X(ii,ij) Y(ii,ij) LineLength*U(ii,ij) LineLength*V(ii,ij)]);
+                   end
+               end
            end
            if strcmp(inAlgorytm, 'None')
                 var = '';
@@ -85,7 +116,9 @@ end
     function stop = logPlot(history)
         stop = false;
         figure(2*i)
-        loglog((1:1:length(history.fval)) , history.fval)
+        semilogy((1:1:length(history.fval)) , history.fval)
+        ylabel("Error")
+        xlabel("Iteration")
         if strcmp(inAlgorytm, 'None')
             var = '';
         else
