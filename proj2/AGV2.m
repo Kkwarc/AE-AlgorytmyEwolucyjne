@@ -5,7 +5,7 @@ items = skrypt1();
 itemsLength = length(items);
 maxW = get_max_weight(items, itemsLength);
 
-opts = optimoptions('ga', 'MaxStallGenerations', 50, 'PopulationSize',30,"MaxGenerations",100);
+opts = optimoptions('ga', 'MaxStallGenerations', 50, 'PopulationSize',40,"MaxGenerations",100);
 
 lb(1:1:32) = 0;
 ub(1:1:32) = 1;
