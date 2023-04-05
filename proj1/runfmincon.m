@@ -1,4 +1,4 @@
-function [xsol,fval,history, info] = runfmincon(mainAlgorytm, inAlgorytm, Gradient, Hesian, initPoint, const, i)
+function [xsol,fval,history, info] = runfmincon(mainAlgorytm, inAlgorytm, Gradient, initPoint, const, i)
 % Call optimization
 x0 = [initPoint(1), initPoint(2)];
 a = const(1);
@@ -18,18 +18,19 @@ if strcmp(Gradient, 'None')
     grad = false;
 end
 
+accuracy = 1e-15;
 display = 'off'; %off / iter
 if strcmp(mainAlgorytm, 'fminunc')
     if grad == true
         opts = optimoptions('fminunc','Algorithm', inAlgorytm, ...
-        'Display',display,'SpecifyObjectiveGradient', true, 'TolFun', 1e-10,...
+        'Display',display,'SpecifyObjectiveGradient', true, 'TolFun', accuracy,...
         'OutputFcn',@outfun);
         [xsol,fval, f, info] = fminunc(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
         logPlot(history)
         
     else
         opts = optimoptions('fminunc','Algorithm', inAlgorytm, ...
-        'Display',display,'GradObj', 'on', 'TolFun', 1e-10,...
+        'Display',display,'GradObj', 'on', 'TolFun', accuracy,...
         'OutputFcn',@outfun);
         [xsol,fval, f, info] = fminunc(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
         logPlot(history)
@@ -37,7 +38,7 @@ if strcmp(mainAlgorytm, 'fminunc')
     end
 elseif strcmp(mainAlgorytm, 'fminsearch')
      opts = optimset('Display',display,...
-         'TolFun', 1e-10, 'OutputFcn',@outfun);
+         'TolFun', accuracy, 'OutputFcn',@outfun);
     [xsol,fval, f, info] = fminsearch(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
     logPlot(history)
     
@@ -117,7 +118,7 @@ end
         stop = false;
         figure(2*i)
         semilogy((1:1:length(history.fval)) , history.fval)
-        ylabel("Error")
+        ylabel("Value of Function")
         xlabel("Iteration")
         if strcmp(inAlgorytm, 'None')
             var = '';
