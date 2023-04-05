@@ -1,6 +1,6 @@
 function [a, b, X1, Y1, X2, Y2, X3, Y3, X4, Y4] = stale()
     a = -1;
-    b = 1.5;
+    b = -1.5;
     X1 = 1;
     Y1 = -0.5;
     X2 = 0;
