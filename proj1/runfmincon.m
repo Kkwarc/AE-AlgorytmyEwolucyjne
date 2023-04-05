@@ -18,7 +18,7 @@ if strcmp(Gradient, 'None')
     grad = false;
 end
 
-accuracy = 1e-15;
+accuracy = 1e-10;
 display = 'off'; %off / iter
 if strcmp(mainAlgorytm, 'fminunc')
     if grad == true
