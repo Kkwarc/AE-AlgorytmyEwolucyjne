@@ -3,9 +3,10 @@ function [xsol,fval,history, info] = runfmincon(mainAlgorytm, inAlgorytm, Gradie
 x0 = [initPoint(1), initPoint(2)];
 a = const(1);
 b = const(2);
+plotlim = 3;
 
     function [X, Y, Z] = xyz()
-        [X,Y] = meshgrid(-5:0.2:5, -5:0.2:5);
+        [X,Y] = meshgrid(-plotlim:0.2:plotlim, -plotlim:0.2:plotlim);
         Z = (1 - X + a).^2 + 100*(Y - b - (X - a).^2).^2;
     end
            
@@ -30,7 +31,7 @@ if strcmp(mainAlgorytm, 'fminunc')
         
     else
         opts = optimoptions('fminunc','Algorithm', inAlgorytm, ...
-        'Display',display,'GradObj', 'on', 'TolFun', accuracy,...
+        'Display',display,'GradObj', 'off', 'TolFun', accuracy,...
         'OutputFcn',@outfun);
         [xsol,fval, f, info] = fminunc(@(x) fbanan(x, a, b), [x0(1), x0(2)], opts);
         logPlot(history)
@@ -44,7 +45,7 @@ elseif strcmp(mainAlgorytm, 'fminsearch')
     
 end
     
- function stop = outfun(x,optimValues,state)
+ function stop = outfun(x,optimValues,state)  % rysowanie wykresu przebiegu kolejnych iteracji algorytmu
      stop = false;
      hold on
      switch state
@@ -60,7 +61,7 @@ end
            hold on;
            grid on;
            plot3(x(1),x(2), fbanan(x, a, b), '.','Color','yellow','MarkerSize',20);
-           axis([-5 5 -5 5 0 10000000]);
+           axis([-plotlim plotlim -plotlim plotlim 0 10000000]);
            view(0,90)
            axis equal;
            
@@ -94,10 +95,10 @@ end
                 var = [', ', inAlgorytm];
             end
            if grad
-               text = ['Algorytm: ', mainAlgorytm, var, ', ', 'GradSupp', ', ', ...
+               text = ['Matlab algorytm: ', mainAlgorytm, var, ', ', 'GradSupp', ', ', ...
                    ' Start point: ', num2str(x0(1)), ', ', num2str(x0(2))];
            else
-               text = ['Algorytm: ', mainAlgorytm, var, ' Start point: ',...
+               text = ['Matlab algorytm: ', mainAlgorytm, var, ' Start point: ',...
                    num2str(x0(1)), ', ', num2str(x0(2))];
            end
            title(text);
@@ -114,7 +115,7 @@ end
          otherwise
      end
  end
-    function stop = logPlot(history)
+    function stop = logPlot(history)  % rysowanie logarytmicznego wykresu wartości funkcji 
         stop = false;
         figure(2*i)
         semilogy((1:1:length(history.fval)) , history.fval)
@@ -126,10 +127,10 @@ end
             var = [', ', inAlgorytm];
         end
         if grad
-           text = ['Algorytm: ', mainAlgorytm, var ', ', 'GradSupp', ', ', ...
+           text = ['Matlab algorytm: ', mainAlgorytm, var ', ', 'GradSupp', ', ', ...
                ' Start point: ', num2str(x0(1)), ',', num2str(x0(2))];
        else
-           text = ['Algorytm: ', mainAlgorytm, var, ' Start point: ',...
+           text = ['Matlab algorytm: ', mainAlgorytm, var, ' Start point: ',...
                num2str(x0(1)), ',', num2str(x0(2))];
        end
         title(text)
