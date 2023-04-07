@@ -16,7 +16,7 @@ for k=1:length(X)
     disp('y:')
     disp(y)
     % fminunc #1 Quasi Newton  Approximated by solver
-    [xsol,fval,history,info] = runfmincon('fminunc', 'quasi-newton', 'None', [x, y], [a, b], i);
+    [xsol,fval,history,info] = runfmin('fminunc', 'quasi-newton', 'None', [x, y], [a, b], i);
     i = i + i;
     disp('Quasi Newton  Approximated by solver')
     disp(['Point: ', num2str(xsol)])
@@ -25,7 +25,7 @@ for k=1:length(X)
     disp(['Function counts: ', num2str(info.funcCount)])
 
 %     % fminunc #2 Quasi Newton Gradient supplied
-    [xsol,fval,history,info] = runfmincon('fminunc', 'quasi-newton', 'on', [x, y], [a, b], i);
+    [xsol,fval,history,info] = runfmin('fminunc', 'quasi-newton', 'on', [x, y], [a, b], i);
     i = i + 1;
     disp('Quasi Newton Gradient supplied')
     disp(['Point: ', num2str(xsol)])
@@ -35,7 +35,7 @@ for k=1:length(X)
 
 
      % fminunc #3 Trust region Approximated by solver
-    [xsol,fval,history,info] = runfmincon('fminunc', 'trust-region', 'On', [x, y], [a, b], i);
+    [xsol,fval,history,info] = runfmin('fminunc', 'trust-region', 'On', [x, y], [a, b], i);
     i = i + 1;
     disp('Trust region Approximated by solver')
     disp(['Point: ', num2str(xsol)])
@@ -45,7 +45,7 @@ for k=1:length(X)
 
 
 %    fminunc #4 fminsearch
-    [xsol,fval,history,info] = runfmincon('fminsearch', 'None', 'None', [x, y], [a, b], i); 
+    [xsol,fval,history,info] = runfmin('fminsearch', 'None', 'None', [x, y], [a, b], i); 
     i = i + 1;
     disp('fminsearch')
     disp(['Point: ', num2str(xsol)])

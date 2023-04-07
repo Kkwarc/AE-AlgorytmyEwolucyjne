@@ -1,4 +1,4 @@
-function [xsol,fval,history, info] = runfmincon(mainAlgorytm, inAlgorytm, Gradient, initPoint, const, i)
+function [xsol,fval,history, info] = runfmin(mainAlgorytm, inAlgorytm, Gradient, initPoint, const, i)
 % Call optimization
 x0 = [initPoint(1), initPoint(2)];
 a = const(1);
