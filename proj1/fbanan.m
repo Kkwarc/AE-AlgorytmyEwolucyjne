@@ -4,6 +4,6 @@ function [z, g] = fbanan(x, a, b)
     dy = 200*(-(x(1)-a)^2-b+x(2));
    
     g = [dx, dy];
-    % y ~ 0.5
+    % y ~ -0.5
     % x ~ 0
 end
