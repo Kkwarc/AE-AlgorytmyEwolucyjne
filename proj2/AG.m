@@ -14,12 +14,12 @@ calkowite_parametry(1:1:32) = (1:1:32);
 seletion = {'selectionroulette', 'selectiontournament'};
 
 for sel=1:length(seletion)
-    global history_pop history_Best history_Score history_Std history_Worst history_Avg
+    global history_pop history_Best history_Score history_Var history_Worst history_Avg
     history_pop     = {};
     history_Score   = {};
     history_Best    = [];
     history_Worst   = [];
-    history_Std     = [];
+    history_Var     = [];
     history_Avg     = [];
     
     opts = optimoptions('ga', 'OutputFcn',@gaoutfun, 'Display', 'iter', ...
@@ -44,7 +44,7 @@ for sel=1:length(seletion)
     plot(history_Worst)    
     figure(2)
     hold on
-    plot(history_Std)
+    plot(history_Var)
     figure(3)
     hold on
     plot(history_Avg)
@@ -56,7 +56,7 @@ figure(1)
 title("Najgorsze")
 legend("Ruletka", "Turniej")
 figure(2)
-title("Odchylenie standardowe")
+title("Wariacja")
 legend("Ruletka", "Turniej")
 figure(3)
 title("Średnia")
