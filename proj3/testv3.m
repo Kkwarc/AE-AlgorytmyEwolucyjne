@@ -99,9 +99,10 @@ function printPoints(dataX, dataY)
 
         x = linspace(-5, 5, 100);
         y = -(b + w1 * x) / w2;
+        z = -(b + w1 * x) / w3;
 
+        subplot(3, 1, 1)
         plot(x, y, 'b', 'LineWidth', 2);
-
         xlabel('X');
         ylabel('Y');
         title(['Wykres 2D', ', i: ', num2str(i)]);
@@ -114,6 +115,42 @@ function printPoints(dataX, dataY)
                 scatter(dataX(k, 1), dataX(k, 2), 'r', 'filled');
             else 
                 scatter(dataX(k, 1), dataX(k, 2), 'b', 'filled');
+            end
+        end
+        hold off
+
+        subplot(3, 1, 2)
+        plot(x, z, 'b', 'LineWidth', 2);
+        xlabel('X');
+        ylabel('Z');
+        title(['Wykres 2D', ', i: ', num2str(i)]);
+
+        hold on
+        grid on
+
+        for k=1:length(dataY)
+            if dataY(k) == 1
+                scatter(dataX(k, 1), dataX(k, 3), 'r', 'filled');
+            else 
+                scatter(dataX(k, 1), dataX(k, 3), 'b', 'filled');
+            end
+        end
+        hold off
+
+        subplot(3, 1, 3)
+        plot(y, z, 'b', 'LineWidth', 2);
+        xlabel('Y');
+        ylabel('Z');
+        title(['Wykres 2D', ', i: ', num2str(i)]);
+
+        hold on
+        grid on
+
+        for k=1:length(dataY)
+            if dataY(k) == 1
+                scatter(dataX(k, 2), dataX(k, 3), 'r', 'filled');
+            else 
+                scatter(dataX(k, 2), dataX(k, 3), 'b', 'filled');
             end
         end
         hold off
