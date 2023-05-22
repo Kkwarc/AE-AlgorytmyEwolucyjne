@@ -1,7 +1,9 @@
 clear all
 close all
 clc
+
 % for plotting
+global history_b history_w1 history_w2 history_w3
 history_w1 = [];
 history_w2 = [];
 history_w3 = [];
@@ -16,17 +18,24 @@ yt = [y(9:10, :); y(19:20, :)];
 
 disp("Testing data accuracy [%]")
 disp(countGood(xt, yt, [0, 0, 0], 0)/length(yt)*100)
-[w, b] = learning(xl, yl, 0.9, history_w1, history_w2, history_w3, history_b);
+[w, b] = learning(xl, yl, 0.9);
 disp("Testing data accuracy [%]")
 disp(countGood(xt, yt, w, b)/length(yt)*100)
 % x = forward(weights, xl(1, :));
 
+printPerceptronParams(history_w1, history_w2, history_w3, history_b)
+
+printPoints(x, y)
+
+
 %% learning
-function [w, b] = learning(dataX, dataY, ni, history_w1, history_w2, history_w3, history_b)
+function [w, b] = learning(dataX, dataY, ni)
+    global history_w1 history_w2 history_w3 history_b
     dataLength = length(dataY);
     w = zeros(1, 3);
     b = 0;
     r = max(max(abs(dataX(:, 1)), max(abs(dataX(:, 2)), max(abs(dataX(:, 3))))));
+    % r = 0;
     disp(['R: ', num2str(r)])
     disp("Starting testing data accuracy [%]")
     disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
@@ -44,7 +53,24 @@ function [w, b] = learning(dataX, dataY, ni, history_w1, history_w2, history_w3,
     disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
     disp('W: ' + string(w))
     disp("B = " + num2str(b))
+end
 
+function n = countGood(dataX, dataY, w, b)
+    n = 0;
+    dataLength = length(dataY);
+    for k=1:dataLength
+        if forward(w, b, dataX(k, :)) == dataY(k)
+            n = n + 1;
+        end
+    end
+end
+
+function class = forward(w, b, inputs)
+    class = sign(b+w*inputs');
+end
+
+
+function printPerceptronParams(history_w1, history_w2, history_w3, history_b)
     % for plotting
     figure(1)
     title("Zmiany parametrów klasyfikatora")
@@ -65,30 +91,53 @@ function [w, b] = learning(dataX, dataY, ni, history_w1, history_w2, history_w3,
     plot(history_b)
     grid on;
     legend('b')
-   
-    % Tworzenie animacji
-    figure;
-    axis([0 10 0 10]); % Ustalenie zakresu osi
-    line = animatedline('Color', 'b'); % Inicjalizacja animowanej linii
+end
+
+function printPoints(dataX, dataY)
+    global history_b history_w1 history_w2 history_w3
     
-    % Aktualizacja animacji
-    for x = 0:0.1:10
-        y = sin(x);
-        addpoints(line, x, y); % Dodanie nowego punktu do animowanej linii
-        drawnow; % Odświeżenie wykresu
-    end
-end
+    % Tworzenie wykresu powierzchniowego 3D
+    figure;
+    for i=1:length(history_b)
+        b = history_b(i);
+        w1 = history_w1(i);
+        w2 = history_w2(i);
+        w3 = history_w3(i);
 
-function n = countGood(dataX, dataY, w, b)
-    n = 0;
-    dataLength = length(dataY);
-    for k=1:dataLength
-        if forward(w, b, dataX(k, :)) == dataY(k)
-            n = n + 1;
+        x = linspace(-5, 5, 100);
+        y = -(b + w1 * x) / w2;
+
+        plot(x, y, 'b', 'LineWidth', 2);
+        
+        xlabel('X');
+        ylabel('Y');
+        title(['Wykres 2D', ', i: ', num2str(i)]);
+    
+        hold on
+        grid on
+    
+        for k=1:length(dataY)
+            if dataY(k) == 1
+                scatter(dataX(k, 1), dataX(k, 2), 'r', 'filled');
+            else 
+                scatter(dataX(k, 1), dataX(k, 2), 'b', 'filled');
+            end
         end
-    end
-end
+        hold off
+        drawnow;
+    
+        % Zapisywanie klatki do pliku GIF
+        frame = getframe(gcf);
+        im = frame2im(frame);
+        [imind, cm] = rgb2ind(im, 256);
 
-function class = forward(w, b, inputs)
-    class = sign(b+w*inputs');
+        if i == 1
+            imwrite(imind, cm, 'animacja.gif', 'gif', 'Loopcount', inf);
+        else
+            imwrite(imind, cm, 'animacja.gif', 'gif', 'WriteMode', 'append');
+        end 
+    end
+    
+    % Wyświetlanie animacji
+    imshow('animacja.gif');
 end
