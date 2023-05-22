@@ -22,15 +22,17 @@ function [w, b] = learning(dataX, dataY, ni)
     w = zeros(1, 3);
     b = 0;
     r = 1;
-    disp("Starting testing data accuracy [%]")
+    disp("Starting learning data accuracy [%]")
     disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
     for k=1:dataLength
+        disp("K: " + num2str(k))
+        disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
         if forward(w, b, dataX(k, :)) ~= dataY(k)
             w = w + ni * dataY(k) * dataX(k, :);
             b = b - ni * r*r;
         end
     end
-    disp("Ending testing data accuracy [%]")
+    disp("Ending learning data accuracy [%]")
     disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
     disp('W: ' + string(w))
     disp("B = " + num2str(b))

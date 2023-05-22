@@ -26,7 +26,8 @@ function [w, b] = learning(dataX, dataY, ni, history_w1, history_w2, history_w3,
     dataLength = length(dataY);
     w = zeros(1, 3);
     b = 0;
-    r = 3;
+    r = max(max(abs(dataX(:, 1)), max(abs(dataX(:, 2)), max(abs(dataX(:, 3))))));
+    disp(['R: ', num2str(r)])
     disp("Starting testing data accuracy [%]")
     disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
     for k=1:dataLength
@@ -65,6 +66,17 @@ function [w, b] = learning(dataX, dataY, ni, history_w1, history_w2, history_w3,
     grid on;
     legend('b')
    
+    % Tworzenie animacji
+    figure;
+    axis([0 10 0 10]); % Ustalenie zakresu osi
+    line = animatedline('Color', 'b'); % Inicjalizacja animowanej linii
+    
+    % Aktualizacja animacji
+    for x = 0:0.1:10
+        y = sin(x);
+        addpoints(line, x, y); % Dodanie nowego punktu do animowanej linii
+        drawnow; % Odświeżenie wykresu
+    end
 end
 
 function n = countGood(dataX, dataY, w, b)
