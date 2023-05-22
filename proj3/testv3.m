@@ -2,78 +2,66 @@ clear all
 close all
 clc
 
-% for plotting
 global history_b history_w1 history_w2 history_w3
 history_w1 = [];
 history_w2 = [];
 history_w3 = [];
 history_b = [];
 
-[x, y] = AEproj3_data(310173);
-xl = [x(1:8, :); x(11:18, :)];
-yl = [y(1:8, :); y(11:18, :)];
-xt = [x(9:10, :); x(19:20, :)];
-yt = [y(9:10, :); y(19:20, :)];
+[x, y] = AEproj3_data(310173); 
 
+D = [x, y];
 
-disp("Testing data accuracy [%]")
-disp(countGood(xt, yt, [0, 0, 0], 0)/length(yt)*100)
-[w, b] = learning(xl, yl, 0.9);
-disp("Testing data accuracy [%]")
-disp(countGood(xt, yt, w, b)/length(yt)*100)
-% x = forward(weights, xl(1, :));
+[w, b] = linearClassification(D, 0.9);
 
 printPerceptronParams(history_w1, history_w2, history_w3, history_b)
 
 printPoints(x, y)
 
+function [w, b] = linearClassification(D, eta)
+    % Wybieranie losowych wierszy
+    numRows = size(D, 1);
+    selectedRows = randperm(numRows, 16);
+    allRows = 1:numRows;
+    missingRows = setdiff(allRows, selectedRows);    
+    
+    % Tworzenie nowej macierzy 16x4
+    learn = D(selectedRows, :);
+    test = D(missingRows, :);
 
-%% learning
-function [w, b] = learning(dataX, dataY, ni)
     global history_w1 history_w2 history_w3 history_b
-    dataLength = length(dataY);
-    w = zeros(1, 3);
+    % Inicjalizacja wag w i biasu b
+    w = zeros(size(learn, 2) - 1, 1);
     b = 0;
-    r = max(max(abs(dataX(:, 1)), max(abs(dataX(:, 2)), max(abs(dataX(:, 3))))));
-    % r = 0;
-    disp(['R: ', num2str(r)])
-    disp("Starting testing data accuracy [%]")
-    disp(countGood(dataX, dataY, w, b)/length(dataY)*100)
-    err = 100;
-    while err > 0
-        for k=1:dataLength
-            if forward(w, b, dataX(k, :)) ~= dataY(k)
-                w = w + ni * dataY(k) * dataX(k, :);
-                b = b - ni * r*r;
+    
+    % Obliczenie promienia r
+    r = max(vecnorm(learn(:, 1:end-1)'));
+    
+    % Powtarzaj do momentu, gdy wszystkie punkty są sklasyfikowane poprawnie
+    while ~all(classify(learn, w, b) == learn(:, end))
+        % Iteracja po wszystkich punktach
+        for i = 1:size(learn, 1)
+            xi = learn(i, 1:end-1)';
+            yi = learn(i, end);
+            
+            % Jeśli punkt jest nieprawidłowo sklasyfikowany, zaktualizuj wagi
+            if sign(w' * xi - b) ~= yi
+                w = w + eta * yi * xi;
+                b = b - eta * yi * r^2;
             end
             history_w1 = [history_w1 w(1)];
             history_w2 = [history_w2 w(2)];
             history_w3 = [history_w3 w(3)];
             history_b = [history_b b];
-        end
-        disp("Ending testing data accuracy [%]")
-        acc = countGood(dataX, dataY, w, b)/length(dataY)*100;
-        disp(acc)
-        err = 100 - acc;
-        disp('W: ' + string(w))
-        disp("B = " + num2str(b))
-    end
-end
-
-function n = countGood(dataX, dataY, w, b)
-    n = 0;
-    dataLength = length(dataY);
-    for k=1:dataLength
-        if forward(w, b, dataX(k, :)) == dataY(k)
-            n = n + 1;
+            disp(classify(test, w, b) == test(:, end))
         end
     end
 end
 
-function class = forward(w, b, inputs)
-    class = sign(b+w*inputs');
+function classification = classify(D, w, b)
+    % Klasyfikacja punktów na podstawie wag w i biasu b
+    classification = sign(D(:, 1:end-1) * w - b);
 end
-
 
 function printPerceptronParams(history_w1, history_w2, history_w3, history_b)
     % for plotting
@@ -144,5 +132,5 @@ function printPoints(dataX, dataY)
     end
 
     % Wyświetlanie animacji
-    % imshow('animacja.gif');
+    imshow('animacja.gif');
 end
