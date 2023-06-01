@@ -31,7 +31,8 @@ function [w, b] = linearClassification(D, eta)
 
     global history_w1 history_w2 history_w3 history_b
     % Inicjalizacja wag w i biasu b
-    w = zeros(size(learn, 2) - 1, 1);
+    % w = zeros(size(learn, 2) - 1, 1);
+    w = [0, 0, 1]';
     b = 0;
     
     % Obliczenie promienia r
