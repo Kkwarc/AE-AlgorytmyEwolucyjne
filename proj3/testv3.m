@@ -2,12 +2,14 @@ clear all
 close all
 clc
 
-global history_b history_w1 history_w2 history_w3 learning_error
+global history_b history_w1 history_w2 history_w3 test_data_error learn_data_error full_data_error
 history_w1 = [];
 history_w2 = [];
 history_w3 = [];
 history_b = [];
-learning_error = [];
+test_data_error = [];
+learn_data_error = [];
+full_data_error = [];
 
 [x, y] = AEproj3_data(310173); 
 
@@ -16,7 +18,7 @@ D = [x, y];
 eta = 0.9;
 [w, b] = Classification(D, eta);
 
-printPerceptronParams(history_w1, history_w2, history_w3, history_b, learning_error, eta)
+printPerceptronParams(history_w1, history_w2, history_w3, history_b, test_data_error, learn_data_error, full_data_error, eta)
 
 printPoints(x, y, eta)
 
@@ -29,11 +31,23 @@ function [w, b] = Classification(D, eta)
     learn = D(selectedRows, :);
     test = D(missingRows, :);
 
-    global history_w1 history_w2 history_w3 history_b learning_error
+    global history_w1 history_w2 history_w3 history_b test_data_error full_data_error learn_data_error
     w = [0, 0, 1]';
     b = 0;
     
     r = max(vecnorm(learn(:, 1:end-1)'));
+
+    history_w1 = [history_w1 w(1)];
+    history_w2 = [history_w2 w(2)];
+    history_w3 = [history_w3 w(3)];
+    history_b = [history_b b];
+    iter_err = get_error(test, w, b);
+    disp(iter_err)
+    test_data_error = [test_data_error, iter_err];
+    iter_err_lear = get_error(learn, w, b);
+    learn_data_error = [learn_data_error, iter_err_lear];
+    data_err = get_error(D, w, b);
+    full_data_error = [full_data_error, data_err];
     
     while ~all(classify(learn, w, b) == learn(:, end))
         for i = 1:size(learn, 1)
@@ -50,9 +64,13 @@ function [w, b] = Classification(D, eta)
             history_w3 = [history_w3 w(3)];
             history_b = [history_b b];
             disp(classify(test, w, b) == test(:, end))
-            iter_err = get_error(D, w, b);
+            iter_err = get_error(test, w, b);
             disp(iter_err)
-            learning_error = [learning_error, iter_err];
+            test_data_error = [test_data_error, iter_err];
+            iter_err_lear = get_error(learn, w, b);
+            learn_data_error = [learn_data_error, iter_err_lear];
+            data_err = get_error(D, w, b);
+            full_data_error = [full_data_error, data_err];
         end
     end
 end
@@ -72,7 +90,7 @@ function classification = classify(D, w, b)
     classification = sign(D(:, 1:end-1) * w - b);
 end
 
-function printPerceptronParams(history_w1, history_w2, history_w3, history_b, learning_error, eta)
+function printPerceptronParams(history_w1, history_w2, history_w3, history_b, learning_error, learn_data_error, full_data_error, eta)
     figure(1)
     subplot(3,1,1);
     hold on;
@@ -102,8 +120,24 @@ function printPerceptronParams(history_w1, history_w2, history_w3, history_b, le
     grid on;
     ylabel("%")
     plot(learning_error)
-    title('Błąd na wszytskich danych w trakcie uczenia, eta: ', num2str(eta))
+    title('Błąd na danych testowych w trakcie uczenia, eta: ', num2str(eta))
     print('-dpng', ['zmiana_e_eta', num2str(eta), '.png'], '-r400')
+
+    figure(4)
+    hold on
+    grid on;
+    ylabel("%")
+    plot(full_data_error)
+    title('Błąd na wszytskich danych w trakcie uczenia, eta: ', num2str(eta))
+    print('-dpng', ['zmiana_fe_eta', num2str(eta), '.png'], '-r400')
+
+    figure(5)
+    hold on
+    grid on;
+    ylabel("%")
+    plot(learn_data_error)
+    title('Błąd na danych uczących w trakcie uczenia, eta: ', num2str(eta))
+    print('-dpng', ['zmiana_te_eta', num2str(eta), '.png'], '-r400')
 end
 
 function printPoints(dataX, dataY, eta) % do gifa
